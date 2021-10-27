@@ -137,3 +137,5 @@ dmypy.json
 
 # Secrets
 .secrets/
+
+out.jsonl

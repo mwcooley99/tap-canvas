@@ -1,6 +1,7 @@
 """REST client handling, including canvasStream base class."""
 
 import requests
+from urllib import parse
 from pathlib import Path
 from typing import Any, Dict, Optional, Union, List, Iterable
 
@@ -50,17 +51,14 @@ class CanvasStream(RESTStream):
         self, response: requests.Response, previous_token: Optional[Any]
     ) -> Optional[Any]:
         """Return a token for identifying next page or None if no more pages."""
-        # TODO: If pagination is required, return a token which can be used to get the
-        #       next page. If this is the final page, return "None" to end the
-        #       pagination loop.
-        if self.next_page_token_jsonpath:
-            all_matches = extract_jsonpath(
-                self.next_page_token_jsonpath, response.json()
-            )
-            first_match = next(iter(all_matches), None)
-            next_page_token = first_match
+        next_page_dict = response.links.get("next", None)
+        if next_page_dict:
+            next_page = next_page_dict["url"]
+            query = dict(parse.parse_qsl(parse.urlsplit(next_page).query))
+            next_page_token = query["page"]
         else:
-            next_page_token = response.headers.get("X-Next-Page", None)
+            next_page_token = None
+
 
         return next_page_token
 
@@ -74,17 +72,9 @@ class CanvasStream(RESTStream):
         if self.replication_key:
             params["sort"] = "asc"
             params["order_by"] = self.replication_key
+        params["per_page"] = 100
         return params
 
-    def prepare_request_payload(
-        self, context: Optional[dict], next_page_token: Optional[Any]
-    ) -> Optional[dict]:
-        """Prepare the data payload for the REST API request.
-
-        By default, no payload will be sent (return None).
-        """
-        # TODO: Delete this method if no payload is required. (Most REST APIs.)
-        return None
 
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
         """Parse the response and return an iterator of result rows."""
