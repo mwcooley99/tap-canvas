@@ -59,7 +59,6 @@ class CanvasStream(RESTStream):
         else:
             next_page_token = None
 
-
         return next_page_token
 
     def get_url_params(
