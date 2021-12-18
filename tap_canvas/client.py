@@ -18,7 +18,7 @@ SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 class CanvasStream(RESTStream):
     """canvas stream class."""
 
-    url_base = "https://dtechhs.instructure.com/api/v1/"
+    url_base = "https://dtechhs.instructure.com/api/v1"
 
     # OR use a dynamic url_base:
     # @property

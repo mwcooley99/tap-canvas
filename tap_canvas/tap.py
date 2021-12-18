@@ -7,10 +7,12 @@ from singer_sdk import typing as th  # JSON schema typing helpers
 
 # TODO: Import your custom stream types here:
 from tap_canvas.streams import (
-    CanvasStream,
     EnrollmentTermStream,
     CourseStream,
-    OutcomeResultStream
+    OutcomeResultStream,
+    EnrollmentsStream,
+    UsersStream,
+    SectionsStream,
 
 )
 # TODO: Compile a list of custom stream types here
@@ -19,6 +21,9 @@ STREAM_TYPES = [
     EnrollmentTermStream,
     CourseStream,
     OutcomeResultStream,
+    EnrollmentsStream,
+    UsersStream,
+    SectionsStream,
 ]
 
 
@@ -34,6 +39,11 @@ class Tapcanvas(Tap):
             required=True,
             description="The token to authenticate against the API service"
         ),
+        th.Property(
+            "course_ends_after",
+            th.DateTimeType,
+            description="Limit courses queried to courses that end after this date."
+        )
         # Will need to add anything the tap needs to know how to pull out the data
         # e.g. Start date or the enrollment term/terss
         # start_date? Use it limit the terms that are being synced. Can be based on airflow date! This would allow the date of the dagrun to determine what will be synced!!
