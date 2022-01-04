@@ -97,7 +97,6 @@ class OutcomeResultStream(CanvasStream):
     name = "outcome_results"
     parent_stream_type = CourseStream
 
-    # TODO: needs to access all courses (prob. parent and child problem)
     path = "/courses/{course_id}/outcome_results"
     primary_keys = ["id"]
     replication_key = None
@@ -112,9 +111,20 @@ class OutcomeResultStream(CanvasStream):
         th.Property("hide_points", th.BooleanType),
         th.Property("hidden", th.BooleanType),
         th.Property("submitted_or_assessed_at", th.DateTimeType),
-        th.Property("links", th.StringType),
-        th.Property("percent", th.NumberType)
+        th.Property("links", th.ObjectType(
+            th.Property("user", th.IntegerType),
+            th.Property("learning_outcome", th.IntegerType),
+            th.Property("assignment", th.StringType),
+            th.Property("alignment", th.StringType)
+        )),
+        th.Property("percent", th.NumberType),
+        th.Property("course_id", th.IntegerType)
     ).to_dict()
+
+    def post_process(self, row: dict, context) -> dict:
+        row = super().post_process(row, context)
+        row["course_id"] = context["course_id"]
+        return row
 
 
 class EnrollmentsStream(CanvasStream):
@@ -195,3 +205,34 @@ class UsersStream(CanvasStream):
         th.Property("sis_import_id", th.IntegerType, description="Placeholder"),
         th.Property("login_id", th.StringType, description="Placeholder"),
     ).to_dict()
+
+class AssignmentsStream(CanvasStream):
+    records_jsonpath = "$.[*]"
+
+    name = "assignments"
+    parent_stream_type = CourseStream
+
+    path = "/courses/{course_id}/assignments"
+    primary_keys = ["id"]
+    replication_key = None
+
+    schema = th.PropertiesList(
+        th.Property("id", th.IntegerType),
+        th.Property("description", th.StringType),
+        th.Property("due_at", th.DateTimeType),
+        th.Property("points_possible", th.NumberType),
+        th.Property("grading_type", th.StringType),
+        th.Property("assignment_group_id", th.IntegerType),
+        th.Property("grading_standard_id", th.IntegerType),
+        th.Property("created_at", th.DateTimeType),
+        th.Property("updated_at", th.DateTimeType),
+        th.Property("course_id", th.IntegerType),
+        th.Property("name", th.StringType),
+        th.Property("rubric", th.StringType),
+        th.Property("published", th.BooleanType)
+    ).to_dict()
+
+class OutcomeStream(CanvasStream):
+    records_path = "$[*]"
+
+    name = "outcomes"

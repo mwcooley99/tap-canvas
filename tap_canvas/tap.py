@@ -13,6 +13,7 @@ from tap_canvas.streams import (
     EnrollmentsStream,
     UsersStream,
     SectionsStream,
+    AssignmentsStream
 
 )
 # TODO: Compile a list of custom stream types here
@@ -24,6 +25,7 @@ STREAM_TYPES = [
     EnrollmentsStream,
     UsersStream,
     SectionsStream,
+    AssignmentsStream
 ]
 
 
