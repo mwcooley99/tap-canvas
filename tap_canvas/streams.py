@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional, Union, List, Iterable
 from singer_sdk import typing as th  # JSON Schema typing helpers
 
 from tap_canvas.client import CanvasStream
-
+import requests
 
 class EnrollmentTermStream(CanvasStream):
     records_jsonpath = "$.enrollment_terms[*]"
@@ -33,7 +33,7 @@ class EnrollmentTermStream(CanvasStream):
 
 
 class CourseStream(CanvasStream):
-    records_jsonpath = "$.[*]"
+    records_jsonpath = "$[*]"
 
     name = "courses"
     path = "/accounts/1/courses"  # TODO: add account id to the config
@@ -92,7 +92,7 @@ class CourseStream(CanvasStream):
 
 
 class OutcomeResultStream(CanvasStream):
-    records_jsonpath = "$.outcome_results[*]"
+    records_jsonpath = "$"
 
     name = "outcome_results"
     parent_stream_type = CourseStream
@@ -118,13 +118,50 @@ class OutcomeResultStream(CanvasStream):
             th.Property("alignment", th.StringType)
         )),
         th.Property("percent", th.NumberType),
-        th.Property("course_id", th.IntegerType)
+        th.Property("course_id", th.IntegerType),
+        th.Property("outcome_id", th.IntegerType),
+        th.Property("outcome_title", th.StringType),
+        th.Property("outcome_display_name", th.StringType),
+        th.Property("outcome_calculation_int", th.IntegerType)
     ).to_dict()
+
+    def get_url_params(
+        self, context: Optional[dict], next_page_token: Optional[Any]
+    ) -> Dict[str, Any]:
+        """Return a dictionary of values to be used in URL parameterization."""
+        params: dict = {}
+        if next_page_token:
+            params["page"] = next_page_token
+        if self.replication_key:
+            params["sort"] = "asc"
+            params["order_by"] = self.replication_key
+        params["per_page"] = 100
+        params["include[]"] = "outcomes"
+
+        return params
 
     def post_process(self, row: dict, context) -> dict:
         row = super().post_process(row, context)
         row["course_id"] = context["course_id"]
         return row
+
+    def parse_response(self, response: requests.Response) -> Iterable[dict]:
+        response_json = response.json()
+        self.logger.info(response_json.keys())
+        outcome_results = response_json["outcome_results"]
+        outcomes = response_json["linked"]["outcomes"]
+
+        for outcome_result in outcome_results:
+            # Add outcome metadata to outcome_result
+            # TODO: add a config option
+            outcome_result_outcome_id = int(outcome_result["links"]["learning_outcome"])
+            # TODO: add a try/except block
+            current_outcome = next(outcome for outcome in outcomes if outcome_result_outcome_id == outcome["id"])
+            outcome_result["outcome_id"] = current_outcome["id"]
+            outcome_result["outcome_title"] = current_outcome["title"]
+            outcome_result["outcome_display_name"] = current_outcome["display_name"]
+            outcome_result["outcome_calculation_int"] = current_outcome["calculation_int"]
+            yield outcome_result
 
 
 class EnrollmentsStream(CanvasStream):
