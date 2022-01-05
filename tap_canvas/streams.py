@@ -122,7 +122,9 @@ class OutcomeResultStream(CanvasStream):
         th.Property("outcome_id", th.IntegerType),
         th.Property("outcome_title", th.StringType),
         th.Property("outcome_display_name", th.StringType),
-        th.Property("outcome_calculation_int", th.IntegerType)
+        th.Property("outcome_calculation_int", th.IntegerType),
+        th.Property("alignment_id", th.StringType),
+        th.Property("alignment_name", th.StringType)
     ).to_dict()
 
     def get_url_params(
@@ -136,7 +138,7 @@ class OutcomeResultStream(CanvasStream):
             params["sort"] = "asc"
             params["order_by"] = self.replication_key
         params["per_page"] = 100
-        params["include[]"] = "outcomes"
+        params["include[]"] = ["outcomes", "alignments"]
 
         return params
 
@@ -150,6 +152,7 @@ class OutcomeResultStream(CanvasStream):
         self.logger.info(response_json.keys())
         outcome_results = response_json["outcome_results"]
         outcomes = response_json["linked"]["outcomes"]
+        alignments = response_json["linked"]["alignments"]
 
         for outcome_result in outcome_results:
             # Add outcome metadata to outcome_result
@@ -161,6 +164,13 @@ class OutcomeResultStream(CanvasStream):
             outcome_result["outcome_title"] = current_outcome["title"]
             outcome_result["outcome_display_name"] = current_outcome["display_name"]
             outcome_result["outcome_calculation_int"] = current_outcome["calculation_int"]
+
+            # Add alignment metadata to outcome_result
+            outcome_result_outcome_id = outcome_result["links"]["alignment"]
+            current_alignment = next(alignment for alignment in alignments if outcome_result_outcome_id == alignment["id"])
+            outcome_result["alignment_id"] = current_alignment["id"]
+            outcome_result["alignment_name"] = current_alignment["name"]
+
             yield outcome_result
 
 
