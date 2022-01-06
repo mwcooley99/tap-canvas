@@ -122,7 +122,7 @@ class OutcomeResultStream(CanvasStream):
         th.Property("outcome_id", th.IntegerType),
         th.Property("outcome_title", th.StringType),
         th.Property("outcome_display_name", th.StringType),
-        th.Property("outcome_calculation_int", th.IntegerType),
+        # th.Property("outcome_calculation_int", th.IntegerType),
         th.Property("alignment_id", th.StringType),
         th.Property("alignment_name", th.StringType)
     ).to_dict()
@@ -158,16 +158,20 @@ class OutcomeResultStream(CanvasStream):
             # Add outcome metadata to outcome_result
             # TODO: add a config option
             outcome_result_outcome_id = int(outcome_result["links"]["learning_outcome"])
-            # TODO: add a try/except block
-            current_outcome = next(outcome for outcome in outcomes if outcome_result_outcome_id == outcome["id"])
+            try:
+                current_outcome = next(outcome for outcome in outcomes if outcome_result_outcome_id == outcome["id"])
+            except StopIteration as e:
+                self.logger.error(f"Could not find outcome_id={outcome_result_outcome_id} in outcome metadata.")
             outcome_result["outcome_id"] = current_outcome["id"]
             outcome_result["outcome_title"] = current_outcome["title"]
             outcome_result["outcome_display_name"] = current_outcome["display_name"]
-            outcome_result["outcome_calculation_int"] = current_outcome["calculation_int"]
 
             # Add alignment metadata to outcome_result
-            outcome_result_outcome_id = outcome_result["links"]["alignment"]
-            current_alignment = next(alignment for alignment in alignments if outcome_result_outcome_id == alignment["id"])
+            try:
+                outcome_result_alignment_id = outcome_result["links"]["alignment"]
+            except StopIteration as e:
+                self.logger.error(f"Could not find alignment_id={outcome_result_alignment_id} in outcome metadata.")
+            current_alignment = next(alignment for alignment in alignments if outcome_result_alignment_id == alignment["id"])
             outcome_result["alignment_id"] = current_alignment["id"]
             outcome_result["alignment_name"] = current_alignment["name"]
 
