@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional, Union, List, Iterable
 from singer_sdk import typing as th  # JSON Schema typing helpers
 
 from tap_canvas.client import CanvasStream
-
+import requests
 
 class EnrollmentTermStream(CanvasStream):
     records_jsonpath = "$.enrollment_terms[*]"
@@ -33,7 +33,7 @@ class EnrollmentTermStream(CanvasStream):
 
 
 class CourseStream(CanvasStream):
-    records_jsonpath = "$.[*]"
+    records_jsonpath = "$[*]"
 
     name = "courses"
     path = "/accounts/1/courses"  # TODO: add account id to the config
@@ -92,12 +92,11 @@ class CourseStream(CanvasStream):
 
 
 class OutcomeResultStream(CanvasStream):
-    records_jsonpath = "$.outcome_results[*]"
+    records_jsonpath = "$"
 
     name = "outcome_results"
     parent_stream_type = CourseStream
 
-    # TODO: needs to access all courses (prob. parent and child problem)
     path = "/courses/{course_id}/outcome_results"
     primary_keys = ["id"]
     replication_key = None
@@ -112,9 +111,71 @@ class OutcomeResultStream(CanvasStream):
         th.Property("hide_points", th.BooleanType),
         th.Property("hidden", th.BooleanType),
         th.Property("submitted_or_assessed_at", th.DateTimeType),
-        th.Property("links", th.StringType),
-        th.Property("percent", th.NumberType)
+        th.Property("links", th.ObjectType(
+            th.Property("user", th.IntegerType),
+            th.Property("learning_outcome", th.IntegerType),
+            th.Property("assignment", th.StringType),
+            th.Property("alignment", th.StringType)
+        )),
+        th.Property("percent", th.NumberType),
+        th.Property("course_id", th.IntegerType),
+        th.Property("outcome_id", th.IntegerType),
+        th.Property("outcome_title", th.StringType),
+        th.Property("outcome_display_name", th.StringType),
+        # th.Property("outcome_calculation_int", th.IntegerType),
+        th.Property("alignment_id", th.StringType),
+        th.Property("alignment_name", th.StringType)
     ).to_dict()
+
+    def get_url_params(
+        self, context: Optional[dict], next_page_token: Optional[Any]
+    ) -> Dict[str, Any]:
+        """Return a dictionary of values to be used in URL parameterization."""
+        params: dict = {}
+        if next_page_token:
+            params["page"] = next_page_token
+        if self.replication_key:
+            params["sort"] = "asc"
+            params["order_by"] = self.replication_key
+        params["per_page"] = 100
+        params["include[]"] = ["outcomes", "alignments"]
+
+        return params
+
+    def post_process(self, row: dict, context) -> dict:
+        row = super().post_process(row, context)
+        row["course_id"] = context["course_id"]
+        return row
+
+    def parse_response(self, response: requests.Response) -> Iterable[dict]:
+        response_json = response.json()
+        self.logger.info(response_json.keys())
+        outcome_results = response_json["outcome_results"]
+        outcomes = response_json["linked"]["outcomes"]
+        alignments = response_json["linked"]["alignments"]
+
+        for outcome_result in outcome_results:
+            # Add outcome metadata to outcome_result
+            # TODO: add a config option
+            outcome_result_outcome_id = int(outcome_result["links"]["learning_outcome"])
+            try:
+                current_outcome = next(outcome for outcome in outcomes if outcome_result_outcome_id == outcome["id"])
+            except StopIteration as e:
+                self.logger.error(f"Could not find outcome_id={outcome_result_outcome_id} in outcome metadata.")
+            outcome_result["outcome_id"] = current_outcome["id"]
+            outcome_result["outcome_title"] = current_outcome["title"]
+            outcome_result["outcome_display_name"] = current_outcome["display_name"]
+
+            # Add alignment metadata to outcome_result
+            try:
+                outcome_result_alignment_id = outcome_result["links"]["alignment"]
+            except StopIteration as e:
+                self.logger.error(f"Could not find alignment_id={outcome_result_alignment_id} in outcome metadata.")
+            current_alignment = next(alignment for alignment in alignments if outcome_result_alignment_id == alignment["id"])
+            outcome_result["alignment_id"] = current_alignment["id"]
+            outcome_result["alignment_name"] = current_alignment["name"]
+
+            yield outcome_result
 
 
 class EnrollmentsStream(CanvasStream):
@@ -195,3 +256,34 @@ class UsersStream(CanvasStream):
         th.Property("sis_import_id", th.IntegerType, description="Placeholder"),
         th.Property("login_id", th.StringType, description="Placeholder"),
     ).to_dict()
+
+class AssignmentsStream(CanvasStream):
+    records_jsonpath = "$.[*]"
+
+    name = "assignments"
+    parent_stream_type = CourseStream
+
+    path = "/courses/{course_id}/assignments"
+    primary_keys = ["id"]
+    replication_key = None
+
+    schema = th.PropertiesList(
+        th.Property("id", th.IntegerType),
+        th.Property("description", th.StringType),
+        th.Property("due_at", th.DateTimeType),
+        th.Property("points_possible", th.NumberType),
+        th.Property("grading_type", th.StringType),
+        th.Property("assignment_group_id", th.IntegerType),
+        th.Property("grading_standard_id", th.IntegerType),
+        th.Property("created_at", th.DateTimeType),
+        th.Property("updated_at", th.DateTimeType),
+        th.Property("course_id", th.IntegerType),
+        th.Property("name", th.StringType),
+        th.Property("rubric", th.StringType),
+        th.Property("published", th.BooleanType)
+    ).to_dict()
+
+class OutcomeStream(CanvasStream):
+    records_path = "$[*]"
+
+    name = "outcomes"
