@@ -122,9 +122,9 @@ class OutcomeResultStream(CanvasStream):
         th.Property("outcome_id", th.IntegerType),
         th.Property("outcome_title", th.StringType),
         th.Property("outcome_display_name", th.StringType),
-        # th.Property("outcome_calculation_int", th.IntegerType),
         th.Property("alignment_id", th.StringType),
-        th.Property("alignment_name", th.StringType)
+        th.Property("alignment_name", th.StringType),
+        th.Property("course_id", th.IntegerType)
     ).to_dict()
 
     def get_url_params(
@@ -142,10 +142,6 @@ class OutcomeResultStream(CanvasStream):
 
         return params
 
-    def post_process(self, row: dict, context) -> dict:
-        row = super().post_process(row, context)
-        row["course_id"] = context["course_id"]
-        return row
 
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
         response_json = response.json()
