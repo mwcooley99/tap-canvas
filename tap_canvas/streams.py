@@ -170,6 +170,7 @@ class OutcomeResultStream(CanvasStream):
             current_alignment = next(alignment for alignment in alignments if outcome_result_alignment_id == alignment["id"])
             outcome_result["alignment_id"] = current_alignment["id"]
             outcome_result["alignment_name"] = current_alignment["name"]
+            outcome_result["alignment_url"] = current_alignment["html_url"]
 
             yield outcome_result
 
