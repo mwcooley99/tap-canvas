@@ -230,7 +230,7 @@ class SectionsStream(CanvasStream):
         th.Property("restrict_enrollments_to_section_dates", th.BooleanType),
         th.Property("sis_section_id", IntegerTypeCustom),
         th.Property("sis_course_id", th.StringType),
-        th.Property("sis_import_id", th.IntegerType),
+        th.Property("sis_import_id", IntegerTypeCustom),
     ).to_dict()
 
 
@@ -244,13 +244,13 @@ class UsersStream(CanvasStream):
     replication_key = None
 
     schema = th.PropertiesList(
-        th.Property("id", th.IntegerType, description="Placeholder"),
+        th.Property("id", IntegerTypeCustom, description="Placeholder"),
         th.Property("name", th.StringType, description="Placeholder"),
         th.Property("created_at", th.DateTimeType, description="Placeholder"),
         th.Property("sortable_name", th.StringType, description="Placeholder"),
         th.Property("short_name", th.StringType, description="Placeholder"),
         th.Property("sis_user_id", th.StringType, description="Placeholder"),
-        th.Property("sis_import_id", th.IntegerType, description="Placeholder"),
+        th.Property("sis_import_id", IntegerTypeCustom, description="Placeholder"),
         th.Property("login_id", th.StringType, description="Placeholder"),
     ).to_dict()
 
@@ -265,16 +265,16 @@ class AssignmentsStream(CanvasStream):
     replication_key = None
 
     schema = th.PropertiesList(
-        th.Property("id", th.IntegerType),
+        th.Property("id", IntegerTypeCustom),
         th.Property("description", th.StringType),
         th.Property("due_at", th.DateTimeType),
         th.Property("points_possible", th.NumberType),
         th.Property("grading_type", th.StringType),
-        th.Property("assignment_group_id", th.IntegerType),
-        th.Property("grading_standard_id", th.IntegerType),
+        th.Property("assignment_group_id", IntegerTypeCustom),
+        th.Property("grading_standard_id", IntegerTypeCustom),
         th.Property("created_at", th.DateTimeType),
         th.Property("updated_at", th.DateTimeType),
-        th.Property("course_id", th.IntegerType),
+        th.Property("course_id", IntegerTypeCustom),
         th.Property("name", th.StringType),
         th.Property("rubric", th.StringType),
         th.Property("published", th.BooleanType)
