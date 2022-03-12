@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional, Union, List, Iterable
 from singer_sdk import typing as th  # JSON Schema typing helpers
 
 from tap_canvas.client import CanvasStream
+from tap_canvas.typing import IntegerTypeCustom
 import requests
 
 class EnrollmentTermStream(CanvasStream):
@@ -25,7 +26,7 @@ class EnrollmentTermStream(CanvasStream):
         th.Property("end_at", th.DateTimeType, description="Placeholder"),
         th.Property("created_at", th.DateTimeType, description="Placeholder"),
         th.Property("workflow_state", th.StringType, description="Placeholder"),
-        th.Property("grading_period_group_id", th.IntegerType,
+        th.Property("grading_period_group_id", IntegerTypeCustom,
                     description="Placeholder"),
         th.Property("sis_term_id", th.StringType, description="Placeholder"),
         th.Property("sis_import_id", th.StringType, description="Placeholder"),
@@ -42,16 +43,16 @@ class CourseStream(CanvasStream):
     # Optionally, you may also use `schema_filepath` in place of `schema`:
     # schema_filepath = SCHEMAS_DIR / "users.json"
     schema = th.PropertiesList(
-        th.Property("root_account_id", th.IntegerType, description="Placeholder"),
-        th.Property("id", th.IntegerType, description="Placeholder"),
-        th.Property("account_id", th.IntegerType, description="Placeholder"),
+        th.Property("root_account_id", IntegerTypeCustom, description="Placeholder"),
+        th.Property("id", IntegerTypeCustom, description="Placeholder"),
+        th.Property("account_id", IntegerTypeCustom, description="Placeholder"),
         th.Property("name", th.StringType, description="Placeholder"),
         th.Property("uuid", th.StringType, description="Placeholder"),
         th.Property("start_at", th.DateTimeType, description="Placeholder"),
         th.Property("created_at", th.DateTimeType, description="Placeholder"),
         th.Property("course_code", th.StringType, description="Placeholder"),
         th.Property("default_view", th.StringType, description="Placeholder"),
-        th.Property("enrollment_term_id", th.IntegerType, description="Placeholder"),
+        th.Property("enrollment_term_id", IntegerTypeCustom, description="Placeholder"),
         th.Property("end_at", th.DateTimeType, description="Placeholder"),
         th.Property("homeroom_course", th.BooleanType, description="Placeholder"),
         th.Property("friendly_name", th.StringType, description="Placeholder"),
@@ -61,7 +62,7 @@ class CourseStream(CanvasStream):
         th.Property("blueprint", th.BooleanType, description="Placeholder"),
         th.Property("template", th.BooleanType, description="Placeholder"),
         th.Property("sis_course_id", th.StringType, description="Placeholder"),
-        th.Property("sis_import_id", th.IntegerType, description="Placeholder"),
+        th.Property("sis_import_id", IntegerTypeCustom, description="Placeholder"),
     ).to_dict()
 
     def get_child_context(self, record: dict, context: Optional[dict]) -> dict:
@@ -103,7 +104,7 @@ class OutcomeResultStream(CanvasStream):
     # Optionally, you may also use `schema_filepath` in place of `schema`:
     # schema_filepath = SCHEMAS_DIR / "users.json"
     schema = th.PropertiesList(
-        th.Property("id", th.IntegerType),
+        th.Property("id", IntegerTypeCustom),
         th.Property("mastery", th.BooleanType),
         th.Property("score", th.NumberType),
         th.Property("possible", th.NumberType),
@@ -112,19 +113,19 @@ class OutcomeResultStream(CanvasStream):
         th.Property("hidden", th.BooleanType),
         th.Property("submitted_or_assessed_at", th.DateTimeType),
         th.Property("links", th.ObjectType(
-            th.Property("user", th.IntegerType),
-            th.Property("learning_outcome", th.IntegerType),
+            th.Property("user", IntegerTypeCustom),
+            th.Property("learning_outcome", IntegerTypeCustom),
             th.Property("assignment", th.StringType),
             th.Property("alignment", th.StringType)
         )),
         th.Property("percent", th.NumberType),
-        th.Property("course_id", th.IntegerType),
-        th.Property("outcome_id", th.IntegerType),
+        th.Property("course_id", IntegerTypeCustom),
+        th.Property("outcome_id", IntegerTypeCustom),
         th.Property("outcome_title", th.StringType),
         th.Property("outcome_display_name", th.StringType),
         th.Property("alignment_id", th.StringType),
         th.Property("alignment_name", th.StringType),
-        th.Property("course_id", th.IntegerType)
+        th.Property("course_id", IntegerTypeCustom)
     ).to_dict()
 
     def get_url_params(
@@ -185,11 +186,11 @@ class EnrollmentsStream(CanvasStream):
     replication_key = None
 
     schema = th.PropertiesList(
-        th.Property("course_id", th.IntegerType, description="Placehold"),
-        th.Property("id", th.IntegerType, description="Placehold"),
-        th.Property("user_id", th.IntegerType, description="Placehold"),
-        th.Property("course_section_id", th.IntegerType, description="Placehold"),
-        th.Property("root_account_id", th.IntegerType, description="Placehold"),
+        th.Property("course_id", IntegerTypeCustom, description="Placehold"),
+        th.Property("id", IntegerTypeCustom, description="Placehold"),
+        th.Property("user_id", IntegerTypeCustom, description="Placehold"),
+        th.Property("course_section_id", IntegerTypeCustom, description="Placehold"),
+        th.Property("root_account_id", IntegerTypeCustom, description="Placehold"),
         th.Property("type", th.StringType, description="Placehold"),
         th.Property("created_at", th.DateTimeType, description="Placehold"),
         th.Property("updated_at", th.DateTimeType, description="Placehold"),
@@ -197,13 +198,13 @@ class EnrollmentsStream(CanvasStream):
         th.Property("end_at", th.DateTimeType, description="Placehold"),
         th.Property("enrollment_state", th.StringType, description="Placehold"),
         th.Property("role", th.StringType, description="Placehold"),
-        th.Property("role_id", th.IntegerType, description="Placehold"),
+        th.Property("role_id", IntegerTypeCustom, description="Placehold"),
         th.Property("last_activity_at", th.DateTimeType, description="Placehold"),
-        th.Property("total_activity_time", th.IntegerType, description="Placehold"),
-        th.Property("sis_import_id", th.IntegerType, description="Placehold"),
+        th.Property("total_activity_time", IntegerTypeCustom, description="Placehold"),
+        th.Property("sis_import_id", IntegerTypeCustom, description="Placehold"),
         th.Property("sis_account_id", th.StringType, description="Placehold"),
         th.Property("sis_course_id", th.StringType, description="Placehold"),
-        th.Property("sis_section_id", th.IntegerType, description="Placehold"),
+        th.Property("sis_section_id", IntegerTypeCustom, description="Placehold"),
         th.Property("sis_user_id", th.StringType, description="Placehold"),
         th.Property("html_url", th.StringType, description="Placehold"),
     ).to_dict()
@@ -220,14 +221,14 @@ class SectionsStream(CanvasStream):
     replication_key = None
 
     schema = th.PropertiesList(
-        th.Property("course_id", th.IntegerType),
-        th.Property("id", th.IntegerType),
+        th.Property("course_id", IntegerTypeCustom),
+        th.Property("id", IntegerTypeCustom),
         th.Property("name", th.StringType),
         th.Property("start_at", th.DateTimeType),
         th.Property("end_at", th.DateTimeType),
         th.Property("created_at", th.DateTimeType),
         th.Property("restrict_enrollments_to_section_dates", th.BooleanType),
-        th.Property("sis_section_id", th.IntegerType),
+        th.Property("sis_section_id", IntegerTypeCustom),
         th.Property("sis_course_id", th.StringType),
         th.Property("sis_import_id", th.IntegerType),
     ).to_dict()
