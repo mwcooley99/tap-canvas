@@ -20,7 +20,7 @@ class EnrollmentTermStream(CanvasStream):
     # Optionally, you may also use `schema_filepath` in place of `schema`:
     # schema_filepath = SCHEMAS_DIR / "users.json"
     schema = th.PropertiesList(
-        th.Property("id", th.IntegerType, description="Enrollment Term ID"),
+        th.Property("id", IntegerTypeCustom, description="Enrollment Term ID"),
         th.Property("name", th.StringType),
         th.Property("start_at", th.DateTimeType, description="Placeholder"),
         th.Property("end_at", th.DateTimeType, description="Placeholder"),
