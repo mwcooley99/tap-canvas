@@ -125,7 +125,8 @@ class OutcomeResultStream(CanvasStream):
         th.Property("outcome_display_name", th.StringType),
         th.Property("alignment_id", th.StringType),
         th.Property("alignment_name", th.StringType),
-        th.Property("course_id", IntegerTypeCustom)
+        th.Property("course_id", IntegerTypeCustom),
+        th.Property("user_id", IntegerTypeCustom)
     ).to_dict()
 
     def get_url_params(
@@ -143,7 +144,6 @@ class OutcomeResultStream(CanvasStream):
 
         return params
 
-
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
         response_json = response.json()
         self.logger.info(response_json.keys())
@@ -152,6 +152,8 @@ class OutcomeResultStream(CanvasStream):
         alignments = response_json["linked"]["alignments"]
 
         for outcome_result in outcome_results:
+            # Add user id
+            outcome_result["user_id"] = outcome_result["links"]["user"]
             # Add outcome metadata to outcome_result
             # TODO: add a config option
             outcome_result_outcome_id = int(outcome_result["links"]["learning_outcome"])
