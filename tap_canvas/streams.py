@@ -17,8 +17,6 @@ class EnrollmentTermStream(CanvasStream):
     path = "/accounts/1/terms"  # TODO: add account id to the config
     primary_keys = ["id"]
     replication_key = None
-    # Optionally, you may also use `schema_filepath` in place of `schema`:
-    # schema_filepath = SCHEMAS_DIR / "users.json"
     schema = th.PropertiesList(
         th.Property("id", IntegerTypeCustom, description="Enrollment Term ID"),
         th.Property("name", th.StringType),
@@ -40,8 +38,6 @@ class CourseStream(CanvasStream):
     path = "/accounts/1/courses"  # TODO: add account id to the config
     primary_keys = ["id"]
     replication_key = None
-    # Optionally, you may also use `schema_filepath` in place of `schema`:
-    # schema_filepath = SCHEMAS_DIR / "users.json"
     schema = th.PropertiesList(
         th.Property("root_account_id", IntegerTypeCustom, description="Placeholder"),
         th.Property("id", IntegerTypeCustom, description="Placeholder"),
@@ -71,7 +67,6 @@ class CourseStream(CanvasStream):
             "course_id": record["id"],
         }
 
-    # Maybe roll back into the other class? Or somehow use inheritance to not rewrite everything?
     def get_url_params(
         self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Dict[str, Any]:
@@ -101,8 +96,6 @@ class OutcomeResultStream(CanvasStream):
     path = "/courses/{course_id}/outcome_results"
     primary_keys = ["id"]
     replication_key = None
-    # Optionally, you may also use `schema_filepath` in place of `schema`:
-    # schema_filepath = SCHEMAS_DIR / "users.json"
     schema = th.PropertiesList(
         th.Property("id", IntegerTypeCustom),
         th.Property("mastery", th.BooleanType),

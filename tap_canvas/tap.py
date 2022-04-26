@@ -5,7 +5,6 @@ from typing import List
 from singer_sdk import Tap, Stream
 from singer_sdk import typing as th  # JSON schema typing helpers
 
-# TODO: Import your custom stream types here:
 from tap_canvas.streams import (
     EnrollmentTermStream,
     CourseStream,
@@ -16,8 +15,6 @@ from tap_canvas.streams import (
     AssignmentsStream
 
 )
-# TODO: Compile a list of custom stream types here
-#       OR rewrite discover_streams() below with your custom logic.
 STREAM_TYPES = [
     EnrollmentTermStream,
     CourseStream,
@@ -46,9 +43,6 @@ class Tapcanvas(Tap):
             th.DateTimeType,
             description="Limit courses queried to courses that end after this date."
         )
-        # Will need to add anything the tap needs to know how to pull out the data
-        # e.g. Start date or the enrollment term/terss
-        # start_date? Use it limit the terms that are being synced. Can be based on airflow date! This would allow the date of the dagrun to determine what will be synced!!
     ).to_dict()
 
     def discover_streams(self) -> List[Stream]:
